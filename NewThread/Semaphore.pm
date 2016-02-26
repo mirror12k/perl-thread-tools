@@ -7,9 +7,20 @@ use feature 'say';
 use threads::shared;
 
 
-# a reimplementation of Thread::Semaphore
+=pod
+
+a thread-safe semaphore for more sophisticated work than simple locking
+
+a reimplementation of Thread::Semaphore
 
 
+=item new
+
+creates a new semaphore
+
+takes an optional argument to become its semaphore count, defaults to 1
+
+=cut
 sub new {
 	my ($class, $count) = @_;
 	my $self = bless {}, $class;
@@ -24,6 +35,12 @@ sub new {
 sub count { @_ > 1 ? $_[0]{count} = $_[1] : $_[0]{count} }
 sub semaphore_lock { @_ > 1 ? $_[0]{semaphore_lock} = $_[1] : $_[0]{semaphore_lock} }
 
+
+=item up
+
+increments the semaphore count. if any threads were blocking on a down, one of blocked threads will be unblocked and receive the semaphore
+
+=cut
 sub up {
 	my ($self) = @_;
 
@@ -35,6 +52,11 @@ sub up {
 	cond_signal $semaphore_lock;
 }
 
+=item down
+
+decrements the semaphore count. if the count would fall below 0, this call will block until another thread calls up on this semaphore
+
+=cut
 sub down {
 	my ($self) = @_;
 
@@ -46,6 +68,11 @@ sub down {
 	$self->count($self->count - 1);
 }
 
+=item down_force
+
+unconditionally decrements the semaphore count, even if it would fall below 0
+
+=cut
 sub down_force {
 	my ($self) = @_;
 
@@ -55,6 +82,11 @@ sub down_force {
 	$self->count($self->count - 1);
 }
 
+=item down_nb
+
+decrements the semaphore count only if it is above 0. returns 1 when successfully decremented, 0 otherwise
+
+=cut
 sub down_nb {
 	my ($self) = @_;
 

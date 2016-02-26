@@ -9,7 +9,9 @@ use FreezeThaw qw/ freeze thaw /;
 
 =pod
 
-a reimplementation of Thread::Queue. a thread-safe queue for passing data between threads
+a thread-safe queue for passing complex data between threads
+
+a reimplementation of Thread::Queue
 
 =item new
 
