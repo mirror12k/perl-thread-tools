@@ -7,8 +7,13 @@ use feature 'say';
 use threads;
 use NewThread::Queue;
 use NewThread::Semaphore;
+use NewThread::Pool;
 use Data::Dumper;
 
+
+
+say '';
+say "queue testing:";
 
 my $queue = NewThread::Queue->new;
 
@@ -33,6 +38,8 @@ say 'dequeuing: ', Dumper $queue->dequeue;
 
 $thr->join;
 
+say '';
+say "semaphore testing:";
 
 
 my $sem = NewThread::Semaphore->new;
@@ -67,4 +74,33 @@ $_->join for @threads;
 
 
 
+
+say '';
+say "thread pool testing:";
+
+
+
+my $pool = NewThread::Pool->new(
+	do_sub => sub {
+		my ($count) = @_;
+
+		say "i am thread $count!";
+		sleep 1;
+		say "thread $count is exiting!";
+
+		my $res = 1;
+		$res *= $count for 1 .. $count;
+		return $res
+	}
+);
+
+$pool->job($_) for 1 .. 10;
+
+for (1 .. 10) {
+	my $res = $pool->result;
+	say "got result: $res->{ret}";
+}
+
+$pool->join;
+# sleep 6;
 
