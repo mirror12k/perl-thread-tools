@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use feature 'say';
+
 use threads::shared;
 
 
@@ -80,9 +81,6 @@ a non-blocking version of dequeue which returns undef if the queue is empty
 =cut
 sub dequeue_nb {
 	my ($self) = @_;
-
-	my $queue_lock = $self->queue_lock;
-	lock($queue_lock);
 
 	return shift @{$self->queue}
 }
