@@ -7,6 +7,7 @@ use feature 'say';
 use threads;
 use NewThread::Queue;
 use NewThread::Semaphore;
+use Data::Dumper;
 
 
 my $queue = NewThread::Queue->new;
@@ -17,8 +18,8 @@ my $thr = threads->create(sub {
 	my $val = $queue->dequeue;
 	say "thread got a queued value: $val";
 	sleep 2;
-	$queue->enqueue(5);
-	$queue->enqueue(4);
+	$queue->enqueue({a => 'apple', b => 'bannana'});
+	$queue->enqueue({ type => 'array', value => [1,5,10, NewThread::Queue->new] });
 });
 
 
@@ -27,8 +28,8 @@ say "thread sent me a queued value: $val";
 $queue->enqueue('qwerty');
 
 sleep 2;
-say 'dequeuing:', $queue->dequeue;
-say 'dequeuing:', $queue->dequeue;
+say 'dequeuing: ', Dumper $queue->dequeue;
+say 'dequeuing: ', Dumper $queue->dequeue;
 
 $thr->join;
 

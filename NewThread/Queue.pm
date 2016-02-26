@@ -5,10 +5,11 @@ use warnings;
 use feature 'say';
 
 use threads::shared;
+use FreezeThaw qw/ freeze thaw /;
 
+=pod
 
-# a reimplementation of Thread::Queue
-
+a reimplementation of Thread::Queue. a thread-safe queue for passing data between threads
 
 =item new
 
@@ -51,7 +52,7 @@ sub enqueue {
 	
 	return 0 if defined $self->max_size and @{$self->queue} + 1 > $self->max_size;
 
-	push @{$self->queue}, $item;
+	push @{$self->queue}, freeze $item;
 
 	cond_signal $queue_lock; # signal any thread waiting for an item
 
@@ -69,9 +70,10 @@ sub dequeue {
 	my $queue_lock = $self->queue_lock;
 	lock($queue_lock);
 
-	cond_wait $queue_lock unless @{$self->queue}; # if the queue is empty, wait until an enqueue signals us
+	cond_wait $queue_lock until @{$self->queue}; # if the queue is empty, wait until an enqueue signals us
 
-	return shift @{$self->queue}
+	my ($obj) = thaw shift @{$self->queue};
+	return $obj
 }
 
 =item dequeue_nb
@@ -82,7 +84,10 @@ a non-blocking version of dequeue which returns undef if the queue is empty
 sub dequeue_nb {
 	my ($self) = @_;
 
-	return shift @{$self->queue}
+	my $obj = shift @{$self->queue};
+	($obj) = thaw $obj if defined $obj;
+
+	return $obj
 }
 
 
