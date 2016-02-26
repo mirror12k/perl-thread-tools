@@ -43,3 +43,5 @@ sub dequeue {
 	shift @{$self->queue};
 }
 
+
+1;
