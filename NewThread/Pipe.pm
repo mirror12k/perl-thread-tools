@@ -43,7 +43,6 @@ sub value_select {
 	my $value_selector = $self->value_selector;
 	lock ($value_selector);
 
-	warn "set selected to $$value_selector";
 	$self->selected($$value_selector);
 	$$value_selector++
 }

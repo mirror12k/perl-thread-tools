@@ -5,11 +5,14 @@ use warnings;
 use feature 'say';
 
 use threads;
+use Data::Dumper;
+
 use NewThread::Queue;
 use NewThread::Semaphore;
 use NewThread::Pool;
 use NewThread::Pipe;
-use Data::Dumper;
+use NewThread::PriorityQueue;
+
 
 
 
@@ -134,3 +137,29 @@ $pipe->print(pack 'NNN', 15, 25, 350);
 
 $thread->join;
 
+
+
+say '';
+say "priority queue testing:";
+
+$queue = NewThread::PriorityQueue->new;
+
+$thread = threads->create(sub {
+	sleep 1;
+	my $item = $queue->dequeue;
+	say "child thread got item: $item";
+	$item = $queue->dequeue;
+	say "child thread got item: $item";
+	$item = $queue->dequeue;
+	say "child thread got item: $item";
+	$item = $queue->dequeue;
+	say "child thread got item: $item";
+});
+
+$queue->enqueue('default priority item!');
+$queue->enqueue(low => 'low priority item!');
+$queue->enqueue(high => 'high priority item!');
+$queue->enqueue(normal => 'normal priority item!');
+
+
+$thread->join;

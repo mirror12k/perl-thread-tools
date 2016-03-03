@@ -52,7 +52,7 @@ sub enqueue {
 	my $queue_lock = $self->queue_lock;
 	lock($queue_lock);
 	
-	return 0 if defined $self->max_size and @{$self->queue} + 1 > $self->max_size;
+	return 0 if defined $self->max_size and @{$self->queue} >= $self->max_size;
 
 	push @{$self->queue}, freeze $item;
 
