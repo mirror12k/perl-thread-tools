@@ -8,6 +8,7 @@ use threads;
 use NewThread::Queue;
 use NewThread::Semaphore;
 use NewThread::Pool;
+use NewThread::Pipe;
 use Data::Dumper;
 
 
@@ -102,5 +103,34 @@ for (1 .. 10) {
 }
 
 $pool->join;
-# sleep 6;
+
+
+say '';
+say "thread pipe testing:";
+
+my $pipe = NewThread::Pipe->new;
+
+my $thread = threads->create(sub {
+	my $data = $pipe->read(12);
+	say "child thread got data from pipe: $data";
+	$pipe->print('lots and lots and lots of data' x 5);
+
+	sleep 2;
+	my $n;
+	$n = unpack 'N', $pipe->read(4);
+	say "child got number: $n";
+	$n = unpack 'N', $pipe->read(4);
+	say "child got number: $n";
+	$n = unpack 'N', $pipe->read(4);
+	say "child got number: $n";
+	say "child thread is done!";
+});
+$pipe->print('hello world!');
+sleep 1;
+my $data = $pipe->read(4096);
+say "parent thread got data from pipe: $data";
+
+$pipe->print(pack 'NNN', 15, 25, 350);
+
+$thread->join;
 
